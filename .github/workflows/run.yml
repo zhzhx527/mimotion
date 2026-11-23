@@ -13,12 +13,8 @@ jobs:
       - name: Checkout codes
         uses: actions/checkout@v5
         with:
-          token: ${{ secrets.PAT }} #此处PAT需要申请，教程详见：README
-
-      # 已移除「Update system and install zsh」步骤：
-      # 该步骤 apt-get update 依赖 azure.archive.ubuntu.com，
-      # GitHub Actions 的 Azure 镜像源经常 DNS 解析失败（Temporary failure resolving），
-      # 导致整个工作流挂掉。而刷步只用到 Python，根本不需要装 zsh，直接删掉最稳。
+          token: ${{ secrets.PAT }}
+          fetch-depth: 0
 
       - name: 初始化Python
         uses: actions/setup-python@v6
@@ -37,6 +33,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@users.noreply.github.com
+          git pull --rebase origin master || true
           git add .
           git diff --cached --quiet || git commit -m "persist tokens trigger by ${{ github.event_name }}"
-          git push origin master
+          git push origin master || git push --force origin master
